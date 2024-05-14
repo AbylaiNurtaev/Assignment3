@@ -15,5 +15,18 @@ public class Main {
         System.out.println(hashTable.remove("two"));
 
         System.out.println(hashTable.getKey(3));
+
+
+        BST<Integer, String> tree = new BST<>();
+        tree.put(5, "apple");
+        tree.put(2, "banana");
+        tree.put(8, "orange");
+        tree.put(1, "grape");
+        tree.put(4, "peach");
+
+        for (BST.Node node : tree) {
+            System.out.println("key is " + node.getKey() + " and value is " + node.getValue());
+        }
+
     }
 }

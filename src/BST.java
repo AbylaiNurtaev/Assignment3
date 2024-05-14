@@ -1,12 +1,15 @@
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.Stack;
 
-public class BST<K extends Comparable<K>, V> {
+public class BST<K extends Comparable<K>, V> implements Iterable<BST.Node> {
     private Node root;
 
-    private class Node {
+    /**
+     * Inner class representing a node in the binary search tree.
+     */
+    public class Node {
         private K key;
         private V val;
         private Node left, right;
@@ -20,10 +23,19 @@ public class BST<K extends Comparable<K>, V> {
             this.key = key;
             this.val = val;
         }
+
+        /**
+         * Returns the key of the node.
+         * @return The key of the node.
+         */
         public K getKey() {
             return key;
         }
 
+        /**
+         * Returns the value of the node.
+         * @return The value of the node.
+         */
         public V getValue() {
             return val;
         }
@@ -80,100 +92,38 @@ public class BST<K extends Comparable<K>, V> {
     }
 
     /**
-     * Deletes the node with the specified key from the binary search tree.
-     * @param key The key of the node to be deleted.
+     * Returns an iterator over elements of type {@code Node}.
+     * @return an Iterator.
      */
-    public void delete(K key) {
-        root = delete(root, key);
+    @Override
+    public Iterator<BST.Node> iterator() {
+        return new BSTIterator();
     }
 
-    private Node delete(Node node, K key) {
-        if (node == null) {
-            return null;
+    private class BSTIterator implements Iterator<BST.Node> {
+        private Queue<Node> queue;
+
+        public BSTIterator() {
+            queue = new LinkedList<>();
+            inorder(root);
         }
 
-        int cmp = key.compareTo(node.key);
-
-        if (cmp < 0) {
-            node.left = delete(node.left, key);
-        } else if (cmp > 0) {
-            node.right = delete(node.right, key);
-        } else {
-            if (node.left == null) {
-                return node.right;
-            } else if (node.right == null) {
-                return node.left;
-            } else {
-                Node successor = min(node.right);
-                node.key = successor.key;
-                node.val = successor.val;
-                node.right = deleteMin(node.right);
-            }
+        private void inorder(Node node) {
+            if (node == null) return;
+            inorder(node.left);
+            queue.add(node);
+            inorder(node.right);
         }
 
-        return node;
-    }
-
-    private Node min(Node node) {
-        if (node == null) {
-            return null;
-        }
-        while (node.left != null) {
-            node = node.left;
-        }
-        return node;
-    }
-
-    private Node deleteMin(Node node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.left == null) {
-            return node.right;
-        }
-        node.left = deleteMin(node.left);
-        return node;
-    }
-
-    /**
-     * Returns an iterable containing the keys of the binary search tree in ascending order.
-     * @return An iterable containing the keys of the binary search tree in ascending order.
-     */
-    public Iterable<Node> iterator() {
-        Stack<Node> stack = new Stack<>();
-        ArrayList<Node> list = new ArrayList<>();
-        Node current = root;
-
-        while (current != null || !stack.isEmpty()) {
-            while (current != null) {
-                stack.push(current);
-                current = current.left;
-            }
-            current = stack.pop();
-            list.add(current);
-            current = current.right;
+        @Override
+        public boolean hasNext() {
+            return !queue.isEmpty();
         }
 
-        return list;
-    }
-
-    private void inorder(Node node, Queue<K> keys) {
-        if (node == null) {
-            return;
+        @Override
+        public BST.Node next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return queue.poll();
         }
-        inorder(node.left, keys);
-        keys.add(node.key);
-        inorder(node.right, keys);
-    }
-
-    public int size() {
-        return size(root);
-    }
-
-    private int size(Node node) {
-        if (node == null) {
-            return 0;
-        }
-        return 1 + size(node.left) + size(node.right);
     }
 }
